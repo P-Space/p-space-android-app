@@ -1,11 +1,14 @@
 package com.example.pspace;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Timer;
-import java.util.TimerTask;
+import android.app.Activity;
+import android.net.http.AndroidHttpClient;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.text.Html;
+import android.view.Menu;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -15,18 +18,17 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.util.EntityUtils;
 
-import android.net.http.AndroidHttpClient;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.app.Activity;
-import android.text.Html;
-import android.view.Menu;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class StatusChanger extends Activity {
-int status = -1;
+
+    int status = -1;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -34,6 +36,9 @@ int status = -1;
 		
 		int delay = 0;
 		int period = 5000;
+
+
+        final String stUrl = "http://www.p-space.gr/status/";
 		
 		Timer timer = new Timer();
 		//check status of p-space now
@@ -42,7 +47,7 @@ int status = -1;
 			public void run() {
 
 				StatusCheck statusCheck = new StatusCheck();
-				statusCheck.execute("http://www.p-space.gr/status/");
+				statusCheck.execute(stUrl);
 			}
 			
 		}, delay, period);
@@ -76,7 +81,7 @@ int status = -1;
 			break;
 		}
 	}
-	
+
 	private class StatusChange extends AsyncTask<String, Void, Void> {
 		
 		protected Void doInBackground(String... params) {

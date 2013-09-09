@@ -4,12 +4,16 @@ import android.app.ActivityManager;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.http.AndroidHttpClient;
+import android.preference.PreferenceManager;
+import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
 import org.apache.http.HttpResponse;
@@ -29,13 +33,16 @@ public class StatusService extends IntentService {
 
     public static final String ACTION_MyIntentService = "com.pspace.gr.RESPONSE";
     public static final String ACTION_MyUpdate = "com.pspace.gr.UPDATE";
-    public static final String EXTRA_KEY_IN = "EXTRA_IN";
     public static final String EXTRA_KEY_OUT = "EXTRA_OUT";
     public static final String EXTRA_KEY_UPDATE = "EXTRA_UPDATE";
 
     int status = -1;
     int notifyid = -1;
     NotificationManager mNM;
+
+    boolean notificationState;
+    boolean notificationSelect;
+    boolean testMenu;
 
     int delay = 0;
     int period = 5000;
@@ -64,9 +71,12 @@ public class StatusService extends IntentService {
     }
 
     public void checkStatus(){
+        loadPref();
         AndroidHttpClient client = AndroidHttpClient
                 .newInstance("pspace_android");
-        HttpGet request = new HttpGet("http://p-space.gr/statustest/");
+        HttpGet request;
+        request = new HttpGet(getResources().getString(R.string.pspaceurl));
+
         HttpResponse response = null;
 
         try {
@@ -124,34 +134,43 @@ public class StatusService extends IntentService {
         CharSequence text;
 
         if (status == 0) {
-            text = "Status: CLOSE";
+            text = "P-Space just closed...";
             mNM.cancelAll();
             notifyid = 0;
-            showNotification(text);
+            updateActivity();
+            if(!notificationSelect)
+                showNotification(text);
         }
         if (status == 1) {
-            text = "Status: OPEN";
-            mNM.cancel(0);
+            text = "P-Space just opened!";
+            mNM.cancelAll();
             notifyid = 1;
+            updateActivity();
             showNotification(text);
         }
         else
+            updateActivity();
             notifyid = -1;
     }
 
     private void showNotification(CharSequence text){
 
-        //send update to the main activity to show that status changed
-        Intent intentUpdate = new Intent();
-        intentUpdate.setAction(ACTION_MyUpdate);
-        intentUpdate.addCategory(Intent.CATEGORY_DEFAULT);
-        intentUpdate.putExtra(EXTRA_KEY_UPDATE, status);
-        sendBroadcast(intentUpdate);
+        Intent intent = new Intent(this, MainActivity.class);
 
-        if(!isForeground("com.pspace.gr")){
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        // Adds the back stack for the Intent (but not the Intent itself)
+        stackBuilder.addParentStack(MainActivity.class);
+        // Adds the Intent that starts the Activity to the top of the stack
+        stackBuilder.addNextIntent(intent);
+        PendingIntent pendingIntent =
+                stackBuilder.getPendingIntent(
+                        0,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
 
+        if(!isForeground("com.pspace.gr")&&notificationState){
         Bitmap icon = BitmapFactory.decodeResource(getApplicationContext().getResources(),
-                R.drawable.ic_launcher);
+                R.drawable.ic_icon);
         // Set the icon, scrolling text and timestamp
 
         Notification notification = new Notification.Builder(getApplicationContext())
@@ -160,11 +179,29 @@ public class StatusService extends IntentService {
                 .setDefaults(Notification.DEFAULT_SOUND)
                 .setAutoCancel(true)
                 .setOnlyAlertOnce(true)
-                .setSmallIcon(R.drawable.ic_launcher)
+                .setSmallIcon(R.drawable.ic_icon)
                 .setLargeIcon(icon)
+                .setContentIntent(pendingIntent)
                 .build();
 
         mNM.notify(notifyid, notification);
         }
+    }
+
+    private void updateActivity(){
+        //send update to the main activity to show that status changed
+        Intent intentUpdate = new Intent();
+        intentUpdate.setAction(ACTION_MyUpdate);
+        intentUpdate.addCategory(Intent.CATEGORY_DEFAULT);
+        intentUpdate.putExtra(EXTRA_KEY_UPDATE, status);
+        sendBroadcast(intentUpdate);
+    }
+
+    private void loadPref(){
+        SharedPreferences mySharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        notificationState = mySharedPreferences.getBoolean("notification_preference", true);
+        notificationSelect = mySharedPreferences.getBoolean("notification_select_preference", false);
+        testMenu = mySharedPreferences.getBoolean("test_preference", false);
     }
 }

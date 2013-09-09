@@ -1,14 +1,21 @@
 package com.pspace.gr;
 
 import android.app.Activity;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
 import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.Html;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -27,24 +34,38 @@ import java.io.InputStreamReader;
 public class MainActivity extends Activity {
 
     int status;
+    boolean testMode;
 
     TextView textStatus;
 
     private MyBroadcastReceiver myBroadcastReceiver;
     private MyBroadcastReceiver_Update myBroadcastReceiver_Update;
 
-    String close = "<font color='#EE0000'>Closed</font>";
-    String open= "<font color='#22b327'>Open</font>";
+    String close = " <font color='#EE0000'>Closed</font>!";
+    String open= " <font color='#22b327'>Open</font>!";
+
+
+    private SharedPreferences settings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        getActionBar().setTitle("Status");
+
         textStatus = (TextView)findViewById(R.id.textStatus);
 
         //Start MyIntentService
         Intent statusIntent = new Intent(this, StatusService.class);
         startService(statusIntent);
+
+        FragmentManager fm = getFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+
+        UberdustParserFragment fragment = new UberdustParserFragment();
+        ft.replace(R.id.list, fragment);
+        ft.commit();
 
         myBroadcastReceiver = new MyBroadcastReceiver();
         myBroadcastReceiver_Update = new MyBroadcastReceiver_Update();
@@ -66,18 +87,51 @@ public class MainActivity extends Activity {
                 StatusSelect();
             }
         });
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
+        // Just for the logout
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case R.id.settings:
+                Intent intent = new Intent();
+                intent.setClass(MainActivity.this, SetPreferenceActivity.class);
+                startActivityForResult(intent, 0);
+
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     public void StatusSelect(){ //uses a switch to control if change
         //status-button results to on or off
+        String url;
+
+        loadPref();
+
+        if(testMode)
+            url = getString(R.string.testpspaceurl);
+        else
+            url = getString(R.string.pspaceurl);
+
         switch (status){
             case 0:
                 //Open
-                new StatusChange().execute(getString(R.string.pspaceurl) + "set.php?open");
+                new StatusChange().execute(url + "set.php?open");
                 break;
             case 1:
                 //Close
-                new StatusChange().execute(getString(R.string.pspaceurl) + "set.php?close");
+                new StatusChange().execute(url + "set.php?close");
                 break;
         }
     }
@@ -147,17 +201,29 @@ public class MainActivity extends Activity {
     private void statusIndicate(){
         switch (status){
             case 1:
-                textStatus.setText(Html.fromHtml("P-Space is " + open + "!"));
+                textStatus.setText(Html.fromHtml(getString(R.string.statusview) + open));
                 break;
             case 0:
-                textStatus.setText(Html.fromHtml("P-Space is " + close + "!"));
+                textStatus.setText(Html.fromHtml(getString(R.string.statusview) + close));
                 break;
             case -2:
-                textStatus.setText("P-Space's server problem");
+                textStatus.setText(getString(R.string.serverproblem));
                 break;
             default:
-                textStatus.setText("You are not connected to the network!");
+                if(!isNetworkConnected())
+                    textStatus.setText(getString(R.string.noconectivity));
+                else
+                    textStatus.setText(getString(R.string.conectivityproblem));
         }
     }
 
+    private boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        return (cm.getActiveNetworkInfo() != null);
+    }
+
+    private void loadPref(){
+        SharedPreferences mySharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        testMode = mySharedPreferences.getBoolean("test_preference", false);
+    }
 }

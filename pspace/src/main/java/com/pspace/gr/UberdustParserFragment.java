@@ -52,7 +52,6 @@ public class UberdustParserFragment extends ListFragment{
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
         loadPref();
 
         getJson();

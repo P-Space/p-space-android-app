@@ -1,8 +1,5 @@
 package com.pspace.gr;
 
-import android.app.Activity;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -36,7 +33,7 @@ public class MainActivity extends Activity {
     int status;
     boolean testMode;
 
-    private DoorParserFragment mParseDoorFragment;
+    private UberdustParserFragment mParseDoorFragment;
 
     TextView textStatus;
 
@@ -66,7 +63,7 @@ public class MainActivity extends Activity {
         FragmentTransaction ft = fm.beginTransaction();
 
         if (savedInstanceState == null) {
-            mParseDoorFragment = new DoorParserFragment();
+            mParseDoorFragment = new UberdustParserFragment();
             ft.replace(R.id.list, mParseDoorFragment);
             ft.commit();
         }

@@ -21,10 +21,10 @@ import java.util.HashMap;
 /**
  * Created by tsagi on 9/9/13.
  */
-public class UberdustParserFragment extends ListFragment{
+public class DoorParserFragment extends ListFragment{
 
-    public static UberdustParserFragment newInstance() {
-        return new UberdustParserFragment();
+    public static DoorParserFragment newInstance() {
+        return new DoorParserFragment();
     }
 
     String timestamp;
@@ -36,9 +36,6 @@ public class UberdustParserFragment extends ListFragment{
     ArrayList<HashMap<String, String>> doorList;
     // creating new HashMap
     HashMap<String, String> map;
-
-    // url to make request
-    String uberurl;
 
     // JSON Node names
     private static final String TAG_EVENTS= "events";
@@ -60,9 +57,9 @@ public class UberdustParserFragment extends ListFragment{
     }
 
     private void getJson(){
-        uberurl = "http://pspace.dyndns.org:88/report/?limit=" + count + "&json";
-        Log.d("url", uberurl);
-        new ParseDoorData().execute(uberurl);
+        String jurl = "http://pspace.dyndns.org:88/report/?limit=" + count + "&json";
+        Log.d("url", jurl);
+        new ParseDoorData().execute(jurl);
     }
 
     private class ParseDoorData extends AsyncTask<String, Void, Void> {
@@ -77,7 +74,7 @@ public class UberdustParserFragment extends ListFragment{
             JSONParser jParser = new JSONParser();
 
             // getting JSON string from URL
-            JSONObject json = jParser.getJSONFromUrl(uberurl);
+            JSONObject json = jParser.getJSONFromUrl(url);
 
             //FIXME
             if (json==null)

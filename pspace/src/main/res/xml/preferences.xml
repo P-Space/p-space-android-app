@@ -13,7 +13,7 @@
             android:key="notification_select_preference"
             android:dependency="notification_preference"
             android:title="Notify only on open"
-            android:summary="Nofify when P-Space opens"/>
+            android:summary="Nofify when P-Space opens only"/>
 
     </PreferenceCategory>
 

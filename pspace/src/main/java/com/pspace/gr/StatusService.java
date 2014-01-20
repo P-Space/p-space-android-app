@@ -5,6 +5,7 @@ import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -14,8 +15,6 @@ import android.graphics.BitmapFactory;
 import android.net.http.AndroidHttpClient;
 import android.os.Build;
 import android.preference.PreferenceManager;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
 import org.apache.http.HttpResponse;
@@ -191,7 +190,7 @@ public class StatusService extends IntentService {
                 mNM.notify(notifyid, notification);
             }
             else{
-                NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
+                Notification.Builder mBuilder = new Notification.Builder(
                         getApplicationContext())
                         .setSmallIcon(R.drawable.ic_icon)
                         .setContentTitle("P-Space")

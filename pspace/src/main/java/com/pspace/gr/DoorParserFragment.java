@@ -49,13 +49,10 @@ public class DoorParserFragment extends ListFragment{
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
         loadPref();
-
         getJson();
-
-
     }
-
     private void getJson(){
         String jurl = "http://pspace.dyndns.org:88/report/?limit=" + count + "&json";
         Log.d("url", jurl);
@@ -132,13 +129,12 @@ public class DoorParserFragment extends ListFragment{
 
     private void loadPref(){
         SharedPreferences mySharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-
         count = mySharedPreferences.getString("count_preference", "10");
     }
 
     private String stampToDate(String timestamp){
-        long dv = Long.valueOf(timestamp);
-        Date df = new java.util.Date(dv);
-        return new SimpleDateFormat("d MMM - H:m").format(df);
+        long dv = Long.parseLong(timestamp);
+        Date df = new java.util.Date(dv*1000);
+        return new SimpleDateFormat("d MMM - HH:mm").format(df);
     }
 }

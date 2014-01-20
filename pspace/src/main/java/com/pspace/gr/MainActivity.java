@@ -36,6 +36,8 @@ public class MainActivity extends Activity {
     int status;
     boolean testMode;
 
+    private UberdustParserFragment mParseDoorFragment;
+
     TextView textStatus;
 
     private MyBroadcastReceiver myBroadcastReceiver;
@@ -63,9 +65,12 @@ public class MainActivity extends Activity {
         FragmentManager fm = getFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();
 
-        UberdustParserFragment fragment = new UberdustParserFragment();
-        ft.replace(R.id.list, fragment);
-        ft.commit();
+        if (savedInstanceState == null) {
+            mParseDoorFragment = new UberdustParserFragment();
+            ft.replace(R.id.list, mParseDoorFragment);
+            ft.commit();
+        }
+
 
         myBroadcastReceiver = new MyBroadcastReceiver();
         myBroadcastReceiver_Update = new MyBroadcastReceiver_Update();

@@ -40,16 +40,12 @@ public class UberdustParserFragment extends ListFragment{
     // url to make request
     String uberurl;
 
-
-
     // JSON Node names
-    private static final String TAG_NODE_ID = "nodeId";
-    private static final String TAG_READINGS = "readings";
-    private static final String TAG_TIMESTAMP = "timestamp";
-    private static final String TAG_TIME = "time";
-    private static final String TAG_READING = "reading";
-    private static final String TAG_STRING_READING = "stringReading";
-    private static final String TAG_CAPABILITY_ID = "capabilityId";
+    private static final String TAG_EVENTS= "events";
+    private static final String TAG_TYPE = "type";
+    private static final String TAG_EXTRA= "extra";
+    private static final String TAG_NAME = "name";
+    private static final String TAG_TIMESTAMP = "t";
 
     // contacts JSONArray
     JSONArray readings = null;
@@ -58,11 +54,16 @@ public class UberdustParserFragment extends ListFragment{
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         loadPref();
-        uberurl = "http://uberdust.cti.gr/rest/testbed/5/node/urn:pspace:door/capability/urn:node:capability:card/json/limit/" + count;
+
+        getJson();
+
+
+    }
+
+    private void getJson(){
+        uberurl = "http://pspace.dyndns.org:88/report/?limit=" + count + "&json";
         Log.d("url", uberurl);
         new ParseDoorData().execute(uberurl);
-
-
     }
 
     private class ParseDoorData extends AsyncTask<String, Void, Void> {
@@ -85,7 +86,7 @@ public class UberdustParserFragment extends ListFragment{
 
             try {
                 // Getting Array of Readings
-                readings = json.getJSONArray(TAG_READINGS);
+                readings = json.getJSONArray(TAG_EVENTS);
 
                 // looping through All Contacts
                 for(int i = 0; i < readings.length(); i++){
@@ -93,24 +94,20 @@ public class UberdustParserFragment extends ListFragment{
 
                     // Storing each json item in variable
                     timestamp= r.getString(TAG_TIMESTAMP);
-                    name = r.getString(TAG_STRING_READING);
-                    reading = r.getString(TAG_READING);
+                    name = r.getString(TAG_NAME);
+                    reading = r.getString(TAG_TYPE);
 
                     // creating new HashMap
                     map = new HashMap<String, String>();
 
-                    long dv = Long.valueOf(timestamp);
-                    Date df = new java.util.Date(dv);
-                    String time = new SimpleDateFormat("d MMM - H:m").format(df);
-
-                    if(name.equals("button"))
+                    if(name.equals("BBoD"))
                         name = "Remote button pressed!";
                     else
                         name = "Card was used by: " + name;
 
                     // adding each child node to HashMap key => value
-                    map.put(TAG_TIME, time);
-                    map.put(TAG_STRING_READING, name);
+                    map.put(TAG_TIMESTAMP, stampToDate(timestamp));
+                    map.put(TAG_NAME, name);
 
                     // adding HashList to ArrayList
                     doorList.add(map);
@@ -130,7 +127,7 @@ public class UberdustParserFragment extends ListFragment{
 
             ListAdapter adapter = new SimpleAdapter(getActivity(), doorList,
                     R.layout.door_list_fragment,
-                    new String[] { TAG_TIME, TAG_STRING_READING }, new int[] {
+                    new String[] { TAG_TIMESTAMP, TAG_NAME }, new int[] {
                     R.id.timestamp, R.id.member });
 
             setListAdapter(adapter);
@@ -141,5 +138,11 @@ public class UberdustParserFragment extends ListFragment{
         SharedPreferences mySharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
         count = mySharedPreferences.getString("count_preference", "10");
+    }
+
+    private String stampToDate(String timestamp){
+        long dv = Long.valueOf(timestamp);
+        Date df = new java.util.Date(dv);
+        return new SimpleDateFormat("d MMM - H:m").format(df);
     }
 }

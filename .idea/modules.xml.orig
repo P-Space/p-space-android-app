@@ -2,9 +2,12 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+<<<<<<< HEAD
       <module fileurl="file://$PROJECT_DIR$/p-space-android-app.iml" filepath="$PROJECT_DIR$/p-space-android-app.iml" />
+=======
       <module fileurl="file://$PROJECT_DIR$/p-space-android-app-tsagi.iml" filepath="$PROJECT_DIR$/p-space-android-app-tsagi.iml" />
       <module fileurl="file://$PROJECT_DIR$/pspace/pspace.iml" filepath="$PROJECT_DIR$/pspace/pspace.iml" />
+>>>>>>> 15b2a75608dbfe56cc368387523f31ccc068f0e5
     </modules>
   </component>
 </project>

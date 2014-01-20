@@ -2,7 +2,7 @@
 ----------------------------------
 
 An Android application that shows info about P-Space's Status and the events 
-of who opens the door from [Uberdust](https://github.com/Uberdust/webapp/wiki).
+of who opens the door from a [JSON Array](http://pspace.dyndns.org:88/report/?limit=15&json).
 
 Details
 -------
